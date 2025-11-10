@@ -2,7 +2,7 @@
 
 struct IntArray{
   void add(int i);
-  int get(size_t id) const;
+  int get(size_t id) const noexcept;
   size_t size() const;
   int last() const;
   IntArray(int i);
@@ -20,8 +20,17 @@ IntArray::IntArray(int i)
   a (new int[1]),
   k(1)
 {
-  a[0] = i;
+  *a = i;
 }
+
+int IntArray::get(size_t id) const noexcept{
+  return a[id];
+}
+
+size_t IntArray::size() const noexcept{
+  return k;
+}
+
 int main(){
   int next = 0;
   std::cin >> next;
