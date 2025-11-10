@@ -31,6 +31,10 @@ size_t IntArray::size() const noexcept{
   return k;
 }
 
+int IntArray::last() const noexcept{
+  return get(size()-1);
+}
+
 int main(){
   int next = 0;
   std::cin >> next;
