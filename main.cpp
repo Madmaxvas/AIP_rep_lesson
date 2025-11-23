@@ -1,80 +1,90 @@
 #include <iostream>
+#include <fstream>
+#include <new>
+#include <cstdlib>
 
-struct IntArray{
-  void add(int i);
-  int get(size_t id) const noexcept;
-  size_t size() const noexcept;
-  int last() const noexcept; 
-  IntArray(int i);
-  ~IntArray();
+class IntArray {
+private:
+    int* a;
+    size_t k;
 
-  int * a;
-  size_t k;
+public:
+    IntArray() : a(nullptr), k(0) {}
+
+    IntArray(size_t size) : a(new int[size]), k(size) {
+        for (size_t i = 0; i < k; ++i) {
+            a[i] = 0;
+        }
+    }
+
+    ~IntArray() {
+        delete[] a;
+    }
+
+    IntArray(const IntArray& other) : a(nullptr), k(0) {
+        if (other.k > 0) {
+            a = new int[other.k];
+            k = other.k;
+            for (size_t i = 0; i < k; ++i) {
+                a[i] = other.a[i];
+            }
+        }
+    }
+
+    IntArray& operator=(const IntArray& other) {
+        if (this == &other) return *this;
+        delete[] a;
+        
+        k = other.k;
+        if (k > 0) {
+            a = new int[k];
+            for (size_t i = 0; i < k; ++i) {
+                a[i] = other.a[i];
+            }
+        } else {
+            a = nullptr;
+        }
+        return *this;
+    }
+
+    size_t size() const noexcept {
+        return k;
+    }
+
+    int& operator[](size_t index) {
+        return a[index];
+    }
+
+    int operator[](size_t index) const {
+        return a[index];
+    }
 };
 
-IntArray::~IntArray(){
-  delete [] a;
-}
+class IntMatrix {
+private:
+    IntArray data;
+    size_t rows;
+    size_t cols;
 
-IntArray::IntArray(int i)
-  : a(new int[1]),
-    k(1)
-{
-  *a = i;
-}
+public:
+    IntMatrix() : rows(0), cols(0) {}
 
-int IntArray::get(size_t id) const noexcept {
-  return a[id];
-}
+    void loadFromFile(const char* filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            exit(1);
+        }
 
-size_t IntArray::size() const noexcept {
-  return k;
-}
+        if (!(file >> rows >> cols)) exit(1);
+        
+        data = IntArray(rows * cols);
 
-int IntArray::last() const noexcept {
-  return get(size()-1);
-}
-
-void IntArray::add(int i){
-  int * tmp = new int[size() + 1];
-  for (size_t j = 0; j < size(); ++j){
-    tmp[j] = get(j);
-  }
-  tmp[size()] = i;
-  delete [] a;
-  a = tmp;
-  ++k;
-}
-
-int main(){
-  int next = 0;
-  std::cin >> next;
-  IntArray a(next);
-  // IntArray a;
-  // a.add(next);
-  while (std::cin >> next){
-    a.add(next);
-    if(std::cin.fail() && !std::cin.eof()){
-      return 1;
+        for (size_t i = 0; i < rows * cols; ++i) {
+            if (!(file >> data[i])) exit(1);
+        }
+        file.close();
     }
-  }
 
-  size_t count = 0;
-
-  if (a.size() == 0) {
-      std::cout << 0 << "\n";
-      return 0;
-  }
-
-  int last_val = a.last();
-
-  for(size_t i = 0; i < a.size(); ++i){
-    int d = a.get(i);
-    if (last_val != 0) {
-        count += !(d % last_val);
-    }
-  }
-
-  std::cout << count << "\n";
-  return 0;
-}
+    void print() const {
+        if (rows == 0 || cols == 0) return;
+        for (size_t i = 0; i < rows; ++i
